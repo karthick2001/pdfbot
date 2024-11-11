@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pdf-app
+  labels:
+    app: pdf-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: pdf-app
+  template:
+    metadata:
+      labels:
+        app: pdf-app
+    spec:
+      containers:
+      - name: pdf-app
+        image: public.ecr.aws/u4i0c1o5/pdfbot:latest
+        ports:
+        - containerPort: 8501

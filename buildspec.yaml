@@ -1,0 +1,38 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.9
+    commands:
+      - echo Installing dependencies...
+      - pip install --upgrade pip
+      - pip install -r requirements.txt  # If any dependencies are required for your build process
+
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR Public...
+      - aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/u4i0c1o5
+      - echo Setting up kubeconfig for EKS...
+      - aws eks --region us-east-1 update-kubeconfig --name pdf-bot-cluster  # Use the correct cluster name
+
+  build:
+    commands:
+      - echo Building the Docker image...
+      - docker build -t pdf_app:latest .
+      - docker tag pdf_app:latest public.ecr.aws/u4i0c1o5/pdf_app:latest
+
+  post_build:
+    commands:
+      - echo Pushing the Docker image to ECR...
+      - docker push public.ecr.aws/u4i0c1o5/pdf_app:latest
+      - echo Deploying to Kubernetes...
+      - kubectl apply -f k8s/deployment.yaml
+      - kubectl apply -f k8s/service.yaml
+
+artifacts:
+  files:
+    - k8s/deployment.yaml
+    - k8s/service.yaml
+    - scripts/*  # Include all the required scripts for your deployment
+  discard-paths: yes

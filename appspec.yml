@@ -1,0 +1,23 @@
+version: 0.0
+os: linux
+files:
+  - source: /
+    destination: /home/ec2-user/myapp  # Replace with your target directory
+
+hooks:
+  BeforeInstall:
+    - location: before_install.sh
+      timeout: 300
+      runas: ec2-user
+
+  ApplicationStop:
+    - location: application_stop.sh
+      timeout: 300
+      runas: ec2-user
+
+  ApplicationStart:
+    - location: application_start.sh
+      timeout: 300
+      runas: ec2-user
+
+
